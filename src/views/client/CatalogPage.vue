@@ -19,7 +19,7 @@
           placeholder="Выберите марку"
         />
         <FormField 
-          v-model.number="priceMin"
+          v-model="priceMin"
           label="Цена от (₽)"
           type="number"
           placeholder="0"

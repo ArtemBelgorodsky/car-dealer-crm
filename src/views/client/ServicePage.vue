@@ -69,10 +69,10 @@
           <div class="form-group">
             <label class="form-label">Тип услуги</label>
             <select v-model="serviceType" class="form-select">
+              <option value="test_drive">Тест-драйв</option>
+              <option value="reserve">Бронирование</option>
               <option value="maintenance">Техническое обслуживание</option>
               <option value="repair">Ремонт</option>
-              <option value="diagnostics">Диагностика</option>
-              <option value="other">Другое</option>
             </select>
           </div>
 
@@ -141,7 +141,7 @@ const submitBooking = () => {
   const request = {
     id: `req-${Date.now()}`,
     clientId: authStore.user.id,
-    type: serviceType.value === 'maintenance' ? 'maintenance' : 'repair' as const,
+    type: serviceType.value as 'test_drive' | 'reserve' | 'maintenance' | 'repair',
     status: 'pending' as const,
     date: new Date(serviceDate.value),
     time: serviceTime.value,
