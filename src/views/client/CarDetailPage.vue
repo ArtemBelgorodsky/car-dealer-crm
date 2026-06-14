@@ -8,7 +8,14 @@
       <div class="grid grid-2 gap-8 mb-8">
         <!-- Фото -->
         <div>
-          <img :src="car.image" alt="Изображение автомобиля" class="w-full h-96 object-cover rounded-lg mb-4" />
+          <div class="detail-image-frame mb-4">
+            <img
+              :src="car.image || fallbackImage"
+              alt="Изображение автомобиля"
+              class="detail-image"
+              @error="setFallbackImage"
+            />
+          </div>
         </div>
 
         <!-- Информация -->
@@ -175,6 +182,7 @@ const testDriveDate = ref('')
 const testDriveTime = ref('14:00')
 const testDriveNote = ref('')
 const reserveNote = ref('')
+const fallbackImage = '/toyota.jpg'
 
 const getTransmission = (type: string) => {
   const transmissions: Record<string, string> = {
@@ -209,6 +217,12 @@ const formatPrice = (price: number) => {
     currency: 'RUB',
     maximumFractionDigits: 0
   }).format(price)
+}
+
+const setFallbackImage = (event: Event) => {
+  const image = event.target as HTMLImageElement
+  if (image.src.endsWith(fallbackImage)) return
+  image.src = fallbackImage
 }
 
 const submitTestDrive = () => {
@@ -276,16 +290,27 @@ const submitReserve = () => {
   gap: 32px;
 }
 
-.h-96 {
-  height: 24rem;
-}
-
 .bg-gray-200 {
   background-color: #e5e7eb;
 }
 
 .rounded-lg {
   border-radius: var(--radius-lg);
+}
+
+.detail-image-frame {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  background-color: #e5e7eb;
+  border-radius: var(--radius-lg);
+}
+
+.detail-image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .bg-gray-50 {

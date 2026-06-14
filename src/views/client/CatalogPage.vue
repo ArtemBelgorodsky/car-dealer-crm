@@ -17,6 +17,7 @@
           label="Марка"
           type="select"
           placeholder="Выберите марку"
+          :options="brandOptions"
         />
         <FormField 
           v-model="priceMin"
@@ -35,6 +36,7 @@
           label="Тип топлива"
           type="select"
           placeholder="Выберите тип"
+          :options="fuelOptions"
         />
       </div>
       
@@ -51,10 +53,15 @@
         :key="car.id"
         hoverable
         class="cursor-pointer transform transition hover:scale-105"
-        @click="$router.push(`/client/car/${car.id}`)"
+        @click="router.push(`/client/car/${car.id}`)"
       >
-        <div class="h-48 bg-gray-200 rounded-lg mb-4 flex items-center justify-center">
-          <img :src="car.image" alt="Изображение автомобиля" class="w-full object-cover rounded-lg mb-4" />
+        <div class="car-image-frame mb-4">
+          <img
+            :src="car.image || fallbackImage"
+            alt="Изображение автомобиля"
+            class="car-image"
+            @error="setFallbackImage"
+          />
         </div>
         
         <h3 class="text-lg font-semibold mb-2">{{ car.brand }} {{ car.model }}</h3>
@@ -113,7 +120,16 @@ const priceMax = ref<number | undefined>(undefined)
 const selectedFuel = ref('')
 
 const filteredCars = computed(() => carsStore.filteredCars)
-const brands = computed(() => carsStore.brands)
+const brandOptions = computed(() =>
+  carsStore.brands.map(brand => ({ label: brand, value: brand }))
+)
+const fallbackImage = '/toyota.jpg'
+const fuelOptions = [
+  { label: 'Бензин', value: 'petrol' },
+  { label: 'Дизель', value: 'diesel' },
+  { label: 'Электро', value: 'electric' },
+  { label: 'Гибрид', value: 'hybrid' }
+]
 
 const applyFilters = () => {
   carsStore.setFilter({
@@ -158,6 +174,12 @@ const formatPrice = (price: number) => {
     maximumFractionDigits: 0
   }).format(price)
 }
+
+const setFallbackImage = (event: Event) => {
+  const image = event.target as HTMLImageElement
+  if (image.src.endsWith(fallbackImage)) return
+  image.src = fallbackImage
+}
 </script>
 
 <style scoped>
@@ -193,12 +215,23 @@ const formatPrice = (price: number) => {
   gap: 12px;
 }
 
-.h-48 {
-  height: 12rem;
-}
-
 .rounded-lg {
   border-radius: var(--radius-lg);
+}
+
+.car-image-frame {
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  background-color: #e5e7eb;
+  border-radius: var(--radius-lg);
+}
+
+.car-image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .mb-4 {

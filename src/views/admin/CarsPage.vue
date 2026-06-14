@@ -72,8 +72,13 @@
                 placeholder="/toyota.jpg или https://..."
               />
             </div>
-            <div v-if="formData.image" class="form-group col-span-2">
-              <img :src="formData.image" alt="Предпросмотр авто" class="image-preview" />
+            <div v-if="formData.image" class="form-group col-span-2 image-preview-frame">
+              <img
+                :src="formData.image"
+                alt="Предпросмотр авто"
+                class="image-preview"
+                @error="setFallbackImage"
+              />
             </div>
             <div class="form-group col-span-2">
               <label class="form-label">Описание</label>
@@ -99,6 +104,7 @@ const carsStore = useCarsStore()
 const cars = computed(() => carsStore.cars)
 const showAddModal = ref(false)
 const editingCar = ref<Car | null>(null)
+const fallbackImage = '/toyota.jpg'
 const formData = ref({
   brand: '',
   model: '',
@@ -140,16 +146,23 @@ const editCar = (car: Car) => {
 
 const saveCar = () => {
   if (!formData.value.brand || !formData.value.model) return
+  const image = formData.value.image.trim() || fallbackImage
+  const carData = {
+    ...formData.value,
+    brand: formData.value.brand.trim(),
+    model: formData.value.model.trim(),
+    image
+  }
 
   if (editingCar.value) {
-    carsStore.updateCar(editingCar.value.id, formData.value)
+    carsStore.updateCar(editingCar.value.id, carData)
   } else {
     carsStore.addCar({
       id: `car-${Date.now()}`,
-      brand: formData.value.brand,
-      model: formData.value.model,
-      year: formData.value.year,
-      price: formData.value.price,
+      brand: carData.brand,
+      model: carData.model,
+      year: carData.year,
+      price: carData.price,
       color: 'Не указан',
       mileage: 0,
       transmission: 'automatic',
@@ -157,9 +170,9 @@ const saveCar = () => {
       engineVolume: 0,
       power: 0,
       seats: 5,
-      image: formData.value.image || '/toyota.jpg',
+      image: carData.image,
       status: 'available',
-      description: formData.value.description,
+      description: carData.description,
       createdAt: new Date()
     })
   }
@@ -176,6 +189,12 @@ const saveCar = () => {
   showAddModal.value = false
   editingCar.value = null
 }
+
+const setFallbackImage = (event: Event) => {
+  const image = event.target as HTMLImageElement
+  if (image.src.endsWith(fallbackImage)) return
+  image.src = fallbackImage
+}
 </script>
 
 <style scoped>
@@ -190,11 +209,16 @@ const saveCar = () => {
 .font-medium { font-weight: 500; }
 .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
 .col-span-2 { grid-column: span 2; }
+.image-preview-frame {
+  overflow: hidden;
+  background-color: #e5e7eb;
+  border-radius: var(--radius-lg);
+  border: 1px solid #e5e7eb;
+}
 .image-preview {
+  display: block;
   width: 100%;
   height: 180px;
   object-fit: cover;
-  border-radius: var(--radius-lg);
-  border: 1px solid #e5e7eb;
 }
 </style>

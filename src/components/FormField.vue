@@ -6,7 +6,7 @@
     </label>
     
     <input
-      v-if="type !== 'textarea'"
+      v-if="type !== 'textarea' && type !== 'select'"
       :type="type"
       :value="modelValue"
       :placeholder="placeholder"
@@ -15,6 +15,24 @@
       class="form-input"
       @input="emit('update:modelValue', ($event.target as HTMLInputElement).value)"
     />
+
+    <select
+      v-else-if="type === 'select'"
+      :value="modelValue"
+      :disabled="disabled"
+      :required="required"
+      class="form-input"
+      @change="emit('update:modelValue', ($event.target as HTMLSelectElement).value)"
+    >
+      <option value="">{{ placeholder || 'Выберите значение' }}</option>
+      <option
+        v-for="option in options"
+        :key="option.value"
+        :value="option.value"
+      >
+        {{ option.label }}
+      </option>
+    </select>
     
     <textarea
       v-else
@@ -31,15 +49,19 @@
 </template>
 
 <script setup lang="ts">
-defineProps<{
+withDefaults(defineProps<{
   modelValue?: string | number
   type?: string
   label?: string
   placeholder?: string
+  options?: Array<{ label: string; value: string }>
   error?: string
   required?: boolean
   disabled?: boolean
-}>()
+}>(), {
+  type: 'text',
+  options: () => []
+})
 
 const emit = defineEmits<{
   'update:modelValue': [value: string | number]
