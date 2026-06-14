@@ -64,6 +64,18 @@
               <input v-model.number="formData.price" type="number" class="form-input" />
             </div>
             <div class="form-group col-span-2">
+              <label class="form-label">Изображение</label>
+              <input
+                v-model="formData.image"
+                type="text"
+                class="form-input"
+                placeholder="/toyota.jpg или https://..."
+              />
+            </div>
+            <div v-if="formData.image" class="form-group col-span-2">
+              <img :src="formData.image" alt="Предпросмотр авто" class="image-preview" />
+            </div>
+            <div class="form-group col-span-2">
               <label class="form-label">Описание</label>
               <textarea v-model="formData.description" class="form-textarea"></textarea>
             </div>
@@ -92,6 +104,7 @@ const formData = ref({
   model: '',
   year: new Date().getFullYear(),
   price: 0,
+  image: '/toyota.jpg',
   description: ''
 })
 
@@ -114,13 +127,52 @@ const getStatus = (status: string) => {
 
 const editCar = (car: Car) => {
   editingCar.value = car
-  formData.value = { brand: car.brand, model: car.model, year: car.year, price: car.price, description: car.description }
+  formData.value = {
+    brand: car.brand,
+    model: car.model,
+    year: car.year,
+    price: car.price,
+    image: car.image,
+    description: car.description
+  }
   showAddModal.value = true
 }
 
 const saveCar = () => {
   if (!formData.value.brand || !formData.value.model) return
+
+  if (editingCar.value) {
+    carsStore.updateCar(editingCar.value.id, formData.value)
+  } else {
+    carsStore.addCar({
+      id: `car-${Date.now()}`,
+      brand: formData.value.brand,
+      model: formData.value.model,
+      year: formData.value.year,
+      price: formData.value.price,
+      color: 'Не указан',
+      mileage: 0,
+      transmission: 'automatic',
+      fuelType: 'petrol',
+      engineVolume: 0,
+      power: 0,
+      seats: 5,
+      image: formData.value.image || '/toyota.jpg',
+      status: 'available',
+      description: formData.value.description,
+      createdAt: new Date()
+    })
+  }
+
   alert('Изменения сохранены!')
+  formData.value = {
+    brand: '',
+    model: '',
+    year: new Date().getFullYear(),
+    price: 0,
+    image: '/toyota.jpg',
+    description: ''
+  }
   showAddModal.value = false
   editingCar.value = null
 }
@@ -138,4 +190,11 @@ const saveCar = () => {
 .font-medium { font-weight: 500; }
 .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
 .col-span-2 { grid-column: span 2; }
+.image-preview {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+  border-radius: var(--radius-lg);
+  border: 1px solid #e5e7eb;
+}
 </style>
